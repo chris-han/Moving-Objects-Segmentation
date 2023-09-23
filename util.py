@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import cv2
-
+from skimage.restoration import (denoise_wavelet, estimate_sigma)
 
 def createCleanBG(input_path, memorize, skipping, save_result, output_path=None):
     """
@@ -15,7 +15,18 @@ def createCleanBG(input_path, memorize, skipping, save_result, output_path=None)
     Returns:
         generated clean background image
     """
-    cap = cv2.VideoCapture(input_path)
+    cap = cv2.VideoCapture(input_path)    
+    # read the 106th frame from cap and save to a file
+    cap.set(1, 106)
+    ret, frame = cap.read()
+    # load varible frame to np array
+    cleanPlate = np.array(frame)
+    # save frame to a file
+    cv2.imwrite(os.path.join(output_path, 'cleanBG.jpg'), cleanPlate)
+
+
+
+    '''
     frameNum = 0
     num_of_memorized_frames = 0
     frames = []
@@ -32,6 +43,7 @@ def createCleanBG(input_path, memorize, skipping, save_result, output_path=None)
     cleanPlate = np.median(np.array(frames), axis=0).astype(np.uint8)
     if save_result:
         cv2.imwrite(os.path.join(output_path, 'cleanBG.jpg'), cleanPlate)
+    '''
     return cleanPlate
 
 
@@ -48,6 +60,8 @@ def preProcess(img, adjust_vibrance=True, vibrance_amount=45,
     Returns:
          image in BGR color space after applying adjustments
     """
+    #denoise(img)
+
     if adjust_vibrance or adjust_shadows:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -112,15 +126,24 @@ def segment(cleanBG, input_path, output_path):
     cap = cv2.VideoCapture(input_path)
     frameNum = 0
     while cap.isOpened():
-        ret, frame = cap.read()
+        ret, orig_frame = cap.read()
         if ret:
-            frame = preProcess(frame,
+            frame = preProcess(orig_frame,
                                adjust_vibrance=True, vibrance_amount=40,
                                adjust_shadows=True, brighten_amount=45)
             frame = frame.astype(np.int16)
             frame = cv2.GaussianBlur(frame, (3, 3), 0)
 
+            # subtract cleanBG from frame by only subtracting the common channels
+
+
             sub = np.subtract(cleanBG, frame)
+            
+            # load varible frame to np array
+            #sub = np.array(frame)           
+
+
+
             abs = np.abs(sub)
             channels_sum = (np.sum(abs, axis=2) / 3)
             channels_sum = channels_sum.astype(np.uint8)
@@ -136,7 +159,29 @@ def segment(cleanBG, input_path, output_path):
                     cv2.drawContours(cleanedMask, [contours[i]], -1, 255, cv2.FILLED)
 
             imgName = 'seq_' + '{:03d}'.format(frameNum) + '.jpg'
-            cv2.imwrite(os.path.join(output_path, imgName), cleanedMask)
+
+            # use cleanedMask as mask to frame
+            masked_frame = cv2.bitwise_and(orig_frame, orig_frame, mask=cleanedMask)
+            masked_imgName = 'seq_' + '{:03d}'.format(frameNum) + '_m.jpg'
+
+            #cv2.imwrite(os.path.join(output_path, imgName), cleanedMask)
+            cv2.imwrite(os.path.join(output_path, imgName), orig_frame)
+            cv2.imwrite(os.path.join(output_path, masked_imgName), masked_frame)
             frameNum += 1
         else:
             break
+
+def denoise(img):
+    """
+    this function denoises an image
+    Parameters:
+        img (ndarray): input image in BGR color space
+        algrithm (string): denoising algorithm
+    Returns:
+         denoised image in BGR color space
+    """
+
+    img = denoise_wavelet(img, channel_axis=-1, convert2ycbcr=True, rescale_sigma=True)        
+
+    return img
+    

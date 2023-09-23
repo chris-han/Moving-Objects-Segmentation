@@ -1,6 +1,6 @@
 import util
 
-in_path = 'input/highway.mp4'
+in_path = 'input/output1024_crop.mp4'
 out_path = 'output/highway'
-cleanBG = util.createCleanBG(input_path=in_path, memorize=15, skipping=6, save_result=True, output_path=out_path)
+cleanBG = util.createCleanBG(input_path=in_path, memorize=1, skipping=106, save_result=True, output_path=out_path)
 util.segment(cleanBG, input_path=in_path, output_path=out_path)
