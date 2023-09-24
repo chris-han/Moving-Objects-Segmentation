@@ -52,6 +52,7 @@ while True:
             
             current_block = current_frame[i:i+block_size, j:j+block_size, 1]
             previous_block = previous_frame[i:i+block_size, j:j+block_size, 1]
+            
 
             # Compute the mean squared error between the blocks
             mse = np.mean((previous_block - current_block) ** 2)
