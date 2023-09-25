@@ -146,6 +146,8 @@ for f in range(1, len(smooth_frame_buffer)):
                     # print('Ratio = {:.2f},Ratio2 = {:.2f}'.format(mse_ratio,mse_ratio2))
                     
                     motion_blocks = np.append(motion_blocks, [(j, i)], axis=0)
+                    # only weight the last 10 changed blocks for clustering
+                    motion_blocks = motion_blocks[-10:]
                     clustering = DBSCAN(eps=100, min_samples=3).fit(motion_blocks)
                     labels = clustering.labels_
                     # only get the labels that are not outliers
