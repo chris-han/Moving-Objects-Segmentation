@@ -46,6 +46,9 @@ while cap.isOpened():
         hue_buffer = [hue_channel]
         sat_channel = hsv_channels[1]
         sat_buffer = [sat_channel]
+        val_channel = hsv_channels[2]
+        val_buffer = [val_channel]
+
         cv2.imshow('Hue Channel', hue_channel)
         cv2.imshow('Saturation Channel', sat_channel)
 
@@ -53,11 +56,14 @@ while cap.isOpened():
             for i in range(num_frames - 1):
                 hue_buffer.append(frame_buffer[i][:, :, 0])
                 sat_buffer.append(frame_buffer[i][:, :, 1])
+                val_buffer.append(frame_buffer[i][:, :, 2])
             avg_hue = np.mean(hue_buffer, axis=0).astype(np.uint8)
             avg_sat = np.mean(sat_buffer, axis=0).astype(np.uint8)
+            avg_val = np.mean(val_buffer, axis=0).astype(np.uint8)
             hsv_channels = list(hsv_channels)
             hsv_channels[0] = avg_hue
             hsv_channels[1] = avg_sat
+            hsv_channels[2] = avg_val
             hsv_channels = tuple(hsv_channels)
 
             # Merge the channels back into an HSV frame
