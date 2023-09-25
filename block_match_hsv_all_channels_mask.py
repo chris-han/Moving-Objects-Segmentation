@@ -103,10 +103,10 @@ overall_bottom_right = (cols,rows)
 # interage over each frame in smooth_frame_buffer
 for f in range(1, len(smooth_frame_buffer)):
     # Read the next frame
-    current_frame_origi = smooth_frame_buffer[f]
+    current_frame_original_color = smooth_frame_buffer[f]
 
     # Convert the frame to the HSV color space
-    current_frame = current_frame_origi# cv2.cvtColor(current_frame_origi, cv2.COLOR_BGR2HSV)
+    current_frame = current_frame_original_color# cv2.cvtColor(current_frame_origi, cv2.COLOR_BGR2HSV)
     #current_frame = denoise_wavelet(current_frame, channel_axis=-1, convert2ycbcr=True, rescale_sigma=True)
     # Iterate over each block
     # Create an array to store the block coordinates
@@ -137,12 +137,12 @@ for f in range(1, len(smooth_frame_buffer)):
                     # draw a red rectangles around blocks that have changed in HSV color space
                     j2=j+block_size
                     i2=i+block_size
-                    cv2.rectangle(current_frame_origi, (j, i), (j2,i2), (0, 255, 0), 5)
+                    cv2.rectangle(current_frame_original_color, (j, i), (j2,i2), (0, 255, 0), 5)
                     # draw mse_hue, mse_sat, mse_val on the frame
                     #cv2.putText(current_frame_origi, 'MSE (H) = {:.2f}'.format(mse_hue), (j, i), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                     #cv2.putText(current_frame_origi, 'MSE (S) = {:.2f}'.format(mse_sat), (j, i+10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                     #cv2.putText(current_frame_origi, 'MSE (V) = {:.2f}'.format(mse_val), (j, i+20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-                    cv2.putText(current_frame_origi, '{:.2f}'.format(mse_ratio), (j, i), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    cv2.putText(current_frame_original_color, '{:.2f}'.format(mse_ratio), (j, i), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                     # print('Ratio = {:.2f},Ratio2 = {:.2f}'.format(mse_ratio,mse_ratio2))
                     
                     motion_blocks = np.append(motion_blocks, [(j, i)], axis=0)
@@ -190,7 +190,7 @@ for f in range(1, len(smooth_frame_buffer)):
                         overall_bottom_right = (bottom_right_x, bottom_right_y)
                         # draw a red rectangle around the overall changed area
                         # cv2.rectangle(current_frame_origi, overall_upper_left, overall_bottom_right, (0, 0, 255), 5)  
-    cv2.rectangle(current_frame_origi, overall_upper_left, overall_bottom_right, (0, 0, 255), 5)                     
+    cv2.rectangle(current_frame_original_color, overall_upper_left, overall_bottom_right, (0, 0, 255), 5)                     
 
 
 
@@ -199,7 +199,7 @@ for f in range(1, len(smooth_frame_buffer)):
 
     # Display the result
     #current_frame = cv2.cvtColor(current_frame, cv2.COLOR_HSV2BGR)
-    cv2.imshow('Block Matching', current_frame_origi)    
+    cv2.imshow('Block Matching', current_frame_original_color)    
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
